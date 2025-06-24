@@ -1,6 +1,6 @@
 # 🍷 Wine Quality Classifier API
 
-![Dashboard Preview](static/images/Dashboard.png)
+![Dashboard Preview](images/Dashboard.png)
 
 An interactive FastAPI microservice that classifies red wine samples as **good** or **not good** based on physicochemical properties, complete with a browser-based UI for real-time predictions.
 
