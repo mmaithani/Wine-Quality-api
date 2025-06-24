@@ -1,7 +1,7 @@
 # 🍷 Wine Quality Classifier API
 
 <p align="center">
-  <img src="images/northeastern-logo.png" alt="Northeastern University" width="200"/>
+  <img src="images/northeastern-logo.png" alt="Northeastern University" width="600"/>
 </p>
 
 
