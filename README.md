@@ -1,5 +1,10 @@
 # 🍷 Wine Quality Classifier API
 
+<p align="center">
+  <img src="static/images/northeastern-logo.png" alt="Northeastern University" width="200"/>
+</p>
+
+
 ![Dashboard Preview](images/Dashboard.png)
 
 An interactive FastAPI microservice that classifies red wine samples as **good** or **not good** based on physicochemical properties, complete with a browser-based UI for real-time predictions.
