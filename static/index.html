@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Wine Quality Classifier</title>
+  <style>
+    body { font-family: sans-serif; max-width: 600px; margin: 2em auto; }
+    label { display: block; margin-top: 1em; }
+    input { width: 100%; padding: .5em; }
+    button { margin-top: 1em; padding: .75em 1.5em; }
+    #result { margin-top: 2em; font-size: 1.2em; }
+  </style>
+</head>
+<body>
+  <h1>🍷 Wine Quality Classifier</h1>
+  <form id="wine-form">
+    <!-- Eleven inputs -->
+    <label>Fixed Acidity<input type="number" step="0.01" name="fixed_acidity" required></label>
+    <label>Volatile Acidity<input type="number" step="0.01" name="volatile_acidity" required></label>
+    <label>Citric Acid<input type="number" step="0.01" name="citric_acid" required></label>
+    <label>Residual Sugar<input type="number" step="0.01" name="residual_sugar" required></label>
+    <label>Chlorides<input type="number" step="0.001" name="chlorides" required></label>
+    <label>Free Sulfur Dioxide<input type="number" step="1" name="free_sulfur_dioxide" required></label>
+    <label>Total Sulfur Dioxide<input type="number" step="1" name="total_sulfur_dioxide" required></label>
+    <label>Density<input type="number" step="0.0001" name="density" required></label>
+    <label>pH<input type="number" step="0.01" name="pH" required></label>
+    <label>Sulphates<input type="number" step="0.01" name="sulphates" required></label>
+    <label>Alcohol<input type="number" step="0.1" name="alcohol" required></label>
+
+    <button type="submit">Predict Quality</button>
+  </form>
+
+  <div id="result"></div>
+
+  <script>
+    const form = document.getElementById('wine-form');
+    const resultDiv = document.getElementById('result');
+
+    form.addEventListener('submit', async e => {
+      e.preventDefault();
+      resultDiv.textContent = '⏳ Predicting…';
+
+      const data = Object.fromEntries(new FormData(form).entries());
+      // convert all values to numbers
+      for (let k in data) data[k] = parseFloat(data[k]);
+
+      try {
+        const res = await fetch('/predict', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        if (!res.ok) throw new Error(`Status ${res.status}`);
+        const json = await res.json();
+        resultDiv.innerHTML = `
+          🎉 <strong>Prediction:</strong> ${json.prediction.toUpperCase()}<br>
+          💯 <strong>Confidence:</strong> ${(json.probability * 100).toFixed(1)}%
+        `;
+      } catch (err) {
+        resultDiv.textContent = '❌ Error: ' + err;
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,9 +1,10 @@
-# app.py
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 import os, torch, torch.nn as nn, torch.nn.functional as F
 
-# 2.1 Define request schema (11 features)
+# 1) Define your request schema
 class WineRequest(BaseModel):
     fixed_acidity: float
     volatile_acidity: float
@@ -17,7 +18,7 @@ class WineRequest(BaseModel):
     sulphates: float
     alcohol: float
 
-# 2.2 Rebuild your network
+# 2) Rebuild your network
 class WineNet(nn.Module):
     def __init__(self):
         super().__init__()
@@ -29,14 +30,24 @@ class WineNet(nn.Module):
         x = F.relu(self.fc2(x))
         return self.out(x)
 
-# 2.3 Load weights
+# 3) Load weights
 model = WineNet()
-model.load_state_dict(torch.load("model.pth", map_location="cpu"))
+model_file = os.path.join(os.path.dirname(__file__), "model.pth")
+model.load_state_dict(torch.load(model_file, map_location="cpu"))
 model.eval()
 
-# 2.4 FastAPI setup
+# 4) Create FastAPI app
 app = FastAPI(title="Wine Quality Classifier")
 
+# 5) Serve the static directory at /static
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+# 6) Root endpoint serves our webpage
+@app.get("/")
+def read_index():
+    return FileResponse(os.path.join("static", "index.html"))
+
+# 7) Prediction endpoint
 @app.post("/predict")
 def predict(data: WineRequest):
     x = torch.tensor([[ 
@@ -47,13 +58,15 @@ def predict(data: WineRequest):
     ]], dtype=torch.float)
     with torch.no_grad():
         logits = model(x)
-        probs  = torch.softmax(logits,1)[0].numpy()
+        probs  = torch.softmax(logits, dim=1)[0].numpy()
         idx    = int(probs.argmax())
-    return {"prediction": "good" if idx==1 else "not good",
-            "probability": float(probs[idx])}
+    return {
+        "prediction": "good" if idx==1 else "not good",
+        "probability": float(probs[idx])
+    }
 
-# 2.5 Respect Render’s PORT
+# 8) Run via Uvicorn
 if __name__=="__main__":
     import uvicorn
-    port = int(os.getenv("PORT",8000))
+    port = int(os.getenv("PORT", 8000))
     uvicorn.run("app:app", host="0.0.0.0", port=port)
